@@ -5,7 +5,7 @@ use std::str::FromStr;
 use crate::chunk_type::ChunkType;
 use crate::chunk::Chunk;
 
-struct Png {
+pub(crate) struct Png {
     header: &'static [u8; 8],
     chunks: Vec<Chunk>,
 }
@@ -21,26 +21,20 @@ impl TryFrom<&[u8]> for Png {
       if header != &Png::STANDARD_HEADER {
         return Err(());
       }
-      println!("0 {:?}", &data[0..20]);
       let mut chunks = Vec::new();
       let mut offset = 8;
 
       while offset < data.len() {
           // length only the data field
-          println!("1");
           let length = u32::from_be_bytes(data[offset..offset + 4].try_into().unwrap()) as usize;
-          println!("2 {}", length);
           offset += 4; // length field
-          println!("3 {:?}", &data[offset..offset + 4]);
           let chunk_type_data : [u8;4] = data[offset..offset + 4].try_into().unwrap();
-          println!("3 {:?}", chunk_type_data);
           let chunk_type = ChunkType::try_from(chunk_type_data)?;
           offset += 4; // chunk type
           let chunk_data = &data[offset..offset + length];
           offset += length;  // data
           offset += 4; // Skip crc
           
-          println!("4");
           let chunk = Chunk::new(chunk_type, chunk_data.to_vec());
           chunks.push(chunk);
       }
@@ -70,11 +64,11 @@ impl Png {
         }
     }
 
-    fn append_chunk(&mut self, chunk: Chunk) {
+    pub(crate) fn append_chunk(&mut self, chunk: Chunk) {
         self.chunks.push(chunk);
     }
 
-    fn remove_chunk(&mut self, chunk_type: &str) -> super::Result<Chunk> {
+    pub(crate) fn remove_chunk(&mut self, chunk_type: &str) -> super::Result<Chunk> {
         let chunk_type_data = ChunkType::from_str(chunk_type).unwrap();
         let chunk_index = self.chunks.iter().position(|chunk| chunk.chunk_type() == &chunk_type_data);
         match chunk_index {
@@ -89,16 +83,16 @@ impl Png {
         self.header
     }
 
-    fn chunks(&self) -> &[Chunk] {
+    pub(crate) fn chunks(&self) -> &[Chunk] {
         self.chunks.as_slice()
     }
 
-    fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
+    pub(crate) fn chunk_by_type(&self, chunk_type: &str) -> Option<&Chunk> {
         let chunk_type_data = ChunkType::from_str(chunk_type).unwrap();
         self.chunks.iter().find(|chunk| chunk.chunk_type() == &chunk_type_data)
     }
 
-    fn as_bytes(&self) -> Vec<u8> {
+    pub(crate) fn as_bytes(&self) -> Vec<u8> {
         let mut result = Vec::new();
         result.extend_from_slice(self.header as &[u8]);
         for chunk in self.chunks.iter() {
