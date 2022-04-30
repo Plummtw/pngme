@@ -18,7 +18,7 @@ impl TryFrom<&[u8]> for Png {
           return Err(());
       }
       let header = &data[0..8];
-      if header != &Png::STANDARD_HEADER {
+      if header != Png::STANDARD_HEADER {
         return Err(());
       }
       let mut chunks = Vec::new();
@@ -42,7 +42,7 @@ impl TryFrom<&[u8]> for Png {
       let result = 
           Png {
               header: &Png::STANDARD_HEADER,
-              chunks: chunks,
+              chunks,
           };
       Ok(result)
   }
@@ -60,7 +60,7 @@ impl Png {
     fn from_chunks(chunks: Vec<Chunk>) -> Png {
         Png {
             header: &Png::STANDARD_HEADER,
-            chunks: chunks,
+            chunks,
         }
     }
 

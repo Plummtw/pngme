@@ -42,7 +42,7 @@ fn read_file(file_name: &str) -> std::io::Result<Vec<u8>> {
     let mut data = Vec::new();
     file.read_to_end(&mut data).unwrap();
 
-    return Ok(data);
+    Ok(data)
 }
 
 fn write_file(file_name: &str, data: &[u8]) {
@@ -89,10 +89,7 @@ fn main() {
             let file_path = sub_matches.value_of("FILE_PATH").unwrap();
             let chunk_type = sub_matches.value_of("CHUNK_TYPE").unwrap();
             let message = sub_matches.value_of("MESSAGE").unwrap();
-            let output_file = match sub_matches.value_of("OUTPUT_FILE") {
-                Some(file_name) => file_name,
-                None => file_path
-            };
+            let output_file = sub_matches.value_of("OUTPUT_FILE").unwrap_or(file_path);
 
             let file_data = read_file(file_path).unwrap();
 
@@ -106,7 +103,7 @@ fn main() {
             let chunk_type = sub_matches.value_of("CHUNK_TYPE").unwrap();
 
             let file_data = read_file(file_path).unwrap();
-            let png: Png  = TryFrom::try_from(file_data.as_ref()).unwrap();
+            let png = Png::try_from(file_data.as_ref()).unwrap();
             match png.chunk_by_type(chunk_type) {
                 Some(chunk) => println!("{}", String::from_utf8(chunk.data().to_owned()).unwrap()),
                 None => println!("Chunk not found")
@@ -115,13 +112,10 @@ fn main() {
         Some(("remove", sub_matches)) => {
             let file_path = sub_matches.value_of("FILE_PATH").unwrap();
             let chunk_type = sub_matches.value_of("CHUNK_TYPE").unwrap();
-            let output_file = match sub_matches.value_of("OUTPUT_FILE") {
-                Some(file_name) => file_name,
-                None => file_path
-            };
+            let output_file = sub_matches.value_of("OUTPUT_FILE").unwrap_or(file_path);
 
             let file_data = read_file(file_path).unwrap();
-            let mut png: Png  = TryFrom::try_from(file_data.as_ref()).unwrap();
+            let mut png = Png::try_from(file_data.as_ref()).unwrap();
             match png.remove_chunk(chunk_type) {
                 Ok(_) => {
                     write_file(output_file, png.as_bytes().as_ref());

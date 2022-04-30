@@ -2,7 +2,7 @@
 use std::fmt::Debug;
 use std::fmt::Display;
 use crate::chunk_type::ChunkType;
-use crc32fast;
+// use crc32fast;
 
 pub(crate) struct Chunk {
     chunk_type: ChunkType, 
@@ -30,9 +30,9 @@ impl TryFrom<&[u8]> for Chunk {
       }
 
       let result = Chunk { 
-        chunk_type: chunk_type,
+        chunk_type,
         data: chunk_data,
-        crc: crc
+        crc
       };
       Ok(result)
   }
@@ -57,9 +57,9 @@ impl Chunk {
         let chuck_type_with_data = [&chunk_type.bytes(), data.as_slice()].concat();
         let crc = crc32fast::hash(&chuck_type_with_data);
         Chunk {
-            chunk_type: chunk_type,
-            data: data,
-            crc: crc
+            chunk_type,
+            data,
+            crc
         }
     }
 
